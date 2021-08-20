@@ -82,8 +82,7 @@ class RetryInterceptor extends Interceptor {
     }
     if (error.type == DioErrorType.other) {
       var connectivityResult = await Connectivity().checkConnectivity();
-      if (connectivityResult == ConnectivityResult.none &&
-          !_isNavigatingNoInternet) {
+      if (connectivityResult == ConnectivityResult.none) {
         _isNavigatingNoInternet = true;
         await toNoInternetPageNavigator();
         _isNavigatingNoInternet = false;
