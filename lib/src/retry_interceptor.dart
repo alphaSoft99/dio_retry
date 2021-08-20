@@ -122,6 +122,7 @@ class RetryInterceptor extends Interceptor {
 
     if (delay != Duration.zero) await Future<void>.delayed(delay);
     if (_dioErrors.isNotEmpty) {
+      print("element===============>>>>>>>>>");
       _dioErrors.forEach((element) {
         var header = Map<String, dynamic>();
         header.addAll(element.requestOptions.headers);
@@ -136,6 +137,7 @@ class RetryInterceptor extends Interceptor {
       });
       _dioErrors.clear();
     } else {
+      print("single===============>>>>>>>>>");
       var header = Map<String, dynamic>();
       header.addAll(err.requestOptions.headers);
       if (accessTokenGetter != null) {
