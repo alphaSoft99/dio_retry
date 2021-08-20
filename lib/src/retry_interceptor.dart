@@ -52,6 +52,7 @@ class RetryInterceptor extends Interceptor {
   final List<Duration> retryDelays;
 
   var _isRefreshing = false;
+  var _isNavigatingNoInternet = false;
 
   /// Evaluating if a retry is necessary.regarding the error.
   ///
@@ -81,12 +82,13 @@ class RetryInterceptor extends Interceptor {
     }
     if (error.type == DioErrorType.other) {
       var connectivityResult = await Connectivity().checkConnectivity();
-      if (connectivityResult == ConnectivityResult.none) {
+      if (connectivityResult == ConnectivityResult.none &&
+          !_isNavigatingNoInternet) {
+        _isNavigatingNoInternet = true;
         await toNoInternetPageNavigator();
-        shouldRetry = true;
-      } else {
-        shouldRetry = true;
+        _isNavigatingNoInternet = false;
       }
+      shouldRetry = true;
     } else {
       shouldRetry = error.type != DioErrorType.cancel;
     }
