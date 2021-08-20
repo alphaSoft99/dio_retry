@@ -90,6 +90,8 @@ class RetryInterceptor extends Interceptor {
           _isNavigatingNoInternet = true;
           await toNoInternetPageNavigator();
           _isNavigatingNoInternet = false;
+        } else {
+          return false;
         }
       }
       shouldRetry = true;
