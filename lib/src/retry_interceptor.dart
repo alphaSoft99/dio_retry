@@ -133,8 +133,8 @@ class RetryInterceptor extends Interceptor {
         // ignore: unawaited_futures
         element.requestOptions.headers = header;
         dio.fetch<void>(element.requestOptions).then((value) {
-          handler.resolve(value);
           if (i == _dioErrors.length - 1) {
+            handler.resolve(value);
             _dioErrors = [];
           }
         });
