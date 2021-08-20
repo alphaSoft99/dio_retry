@@ -123,19 +123,22 @@ class RetryInterceptor extends Interceptor {
     if (delay != Duration.zero) await Future<void>.delayed(delay);
     if (_dioErrors.isNotEmpty) {
       print("element===============>>>>>>>>>");
-      _dioErrors.forEach((element) {
+      for (int i = 0; i < _dioErrors.length; i++) {
         var header = Map<String, dynamic>();
+        var element = _dioErrors[i];
         header.addAll(element.requestOptions.headers);
         if (accessTokenGetter != null) {
           header['Authorization'] = accessTokenGetter!();
         }
         // ignore: unawaited_futures
         element.requestOptions.headers = header;
-        dio
-            .fetch<void>(element.requestOptions)
-            .then((value) => handler.resolve(value));
-      });
-      _dioErrors.clear();
+        dio.fetch<void>(element.requestOptions).then((value) {
+          handler.resolve(value);
+          if (i == _dioErrors.length - 1) {
+            _dioErrors = [];
+          }
+        });
+      }
     } else {
       print("single===============>>>>>>>>>");
       var header = Map<String, dynamic>();
