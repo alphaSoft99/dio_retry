@@ -54,8 +54,6 @@ class RetryInterceptor extends Interceptor {
   var _isRefreshing = false;
   var _isNavigatingNoInternet = false;
 
-  List<DioError> _dioErrors = [];
-
   /// Evaluating if a retry is necessary.regarding the error.
   ///
   /// It can be a good candidate for additional operations too, like
@@ -84,15 +82,11 @@ class RetryInterceptor extends Interceptor {
     }
     if (error.type == DioErrorType.other) {
       var connectivityResult = await Connectivity().checkConnectivity();
-      if (connectivityResult == ConnectivityResult.none) {
-        _dioErrors.add(error);
-        if (!_isNavigatingNoInternet) {
-          _isNavigatingNoInternet = true;
-          await toNoInternetPageNavigator();
-          _isNavigatingNoInternet = false;
-        } else {
-          return false;
-        }
+      if (connectivityResult == ConnectivityResult.none &&
+          !_isNavigatingNoInternet) {
+        _isNavigatingNoInternet = true;
+        await toNoInternetPageNavigator();
+        _isNavigatingNoInternet = false;
       }
       shouldRetry = true;
     } else {
@@ -121,37 +115,15 @@ class RetryInterceptor extends Interceptor {
     );
 
     if (delay != Duration.zero) await Future<void>.delayed(delay);
-    if (_dioErrors.isNotEmpty) {
-      print("element===============>>>>>>>>>");
-      for (int i = 0; i < _dioErrors.length; i++) {
-        var header = Map<String, dynamic>();
-        var element = _dioErrors[i];
-        header.addAll(element.requestOptions.headers);
-        if (accessTokenGetter != null) {
-          header['Authorization'] = accessTokenGetter!();
-        }
-        // ignore: unawaited_futures
-        element.requestOptions.headers = header;
-        dio.fetch<void>(element.requestOptions).then((value) {
-          if (i == _dioErrors.length - 1) {
-            handler.resolve(value);
-            _dioErrors = [];
-          }
-        });
-      }
-    } else {
-      print("single===============>>>>>>>>>");
-      var header = Map<String, dynamic>();
-      header.addAll(err.requestOptions.headers);
-      if (accessTokenGetter != null) {
-        header['Authorization'] = accessTokenGetter!();
-      }
-      // ignore: unawaited_futures
-      err.requestOptions.headers = header;
-      dio
-          .fetch<void>(err.requestOptions)
-          .then((value) => handler.resolve(value));
+
+    var header = Map<String, dynamic>();
+    header.addAll(err.requestOptions.headers);
+    if (accessTokenGetter != null) {
+      header['Authorization'] = accessTokenGetter!();
     }
+    // ignore: unawaited_futures
+    err.requestOptions.headers = header;
+    dio.fetch<void>(err.requestOptions).then((value) => handler.resolve(value));
   }
 
   Duration _getDelay(int attempt) {
