@@ -17,6 +17,7 @@ class RetryInterceptor extends Interceptor {
     this.refreshTokenFunction,
     this.accessTokenGetter,
     required this.toNoInternetPageNavigator,
+    this.moreRequestAwaitDuration = const Duration(seconds: 2),
     this.retryDelays = const [
       Duration(seconds: 1),
     ],
@@ -27,6 +28,9 @@ class RetryInterceptor extends Interceptor {
 
   ///refresh token functions get api client
   final RefreshTokenFunction? refreshTokenFunction;
+
+  /// More request await duration
+  final Duration? moreRequestAwaitDuration;
 
   /// Access token getter from storage
   final AccessTokenGetter? accessTokenGetter;
@@ -47,6 +51,8 @@ class RetryInterceptor extends Interceptor {
   /// the last value of [retryDelays] will be used.
   final List<Duration> retryDelays;
 
+  var _isRefreshing = false;
+
   /// Evaluating if a retry is necessary.regarding the error.
   ///
   /// It can be a good candidate for additional operations too, like
@@ -58,14 +64,19 @@ class RetryInterceptor extends Interceptor {
 
   /// Returns true only if the response hasn't been cancelled or got
   /// a bas status code.
+
   // ignore: avoid-unused-parameters
   FutureOr<bool> defaultRetryEvaluator(DioError error, int attempt) async {
     bool shouldRetry;
     if (error.type == DioErrorType.response) {
       final statusCode = error.response?.statusCode;
       shouldRetry = statusCode != null ? isRetryable(statusCode) : true;
-      if ((statusCode ?? 500) == 401) {
-        refreshTokenFunction!();
+      if ((statusCode ?? 500) == 401 && !_isRefreshing) {
+        _isRefreshing = true;
+        await refreshTokenFunction!();
+        _isRefreshing = false;
+      } else if ((statusCode ?? 500) == 401 && _isRefreshing) {
+        await Future.delayed(moreRequestAwaitDuration ?? Duration(seconds: 2));
       }
     }
     if (error.type == DioErrorType.other) {
