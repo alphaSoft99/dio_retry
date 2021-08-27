@@ -68,7 +68,7 @@ class RetryInterceptor extends Interceptor {
 
   // ignore: avoid-unused-parameters
   FutureOr<bool> defaultRetryEvaluator(DioError error, int attempt) async {
-    bool shouldRetry;
+    bool? shouldRetry;
     if (error.type == DioErrorType.response) {
       final statusCode = error.response?.statusCode;
       shouldRetry = statusCode != null ? isRetryable(statusCode) : true;
@@ -89,10 +89,8 @@ class RetryInterceptor extends Interceptor {
         _isNavigatingNoInternet = false;
       }
       shouldRetry = true;
-    } else {
-      shouldRetry = error.type != DioErrorType.cancel;
     }
-    return shouldRetry;
+    return shouldRetry ?? false;
   }
 
   @override
