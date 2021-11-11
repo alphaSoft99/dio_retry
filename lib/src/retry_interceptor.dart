@@ -5,7 +5,7 @@ import 'package:dio_retry/src/http_status_codes.dart';
 
 typedef RetryEvaluator = FutureOr<bool> Function(DioError error, int attempt);
 typedef RefreshTokenFunction = Future<void> Function();
-typedef AccessTokenGetter = String Function();
+typedef AccessTokenGetter = Future<String> Function();
 typedef ToNoInternetPageNavigator = Future<void> Function();
 
 /// An interceptor that will try to send failed request again
