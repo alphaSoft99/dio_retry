@@ -111,8 +111,8 @@ class RetryInterceptor extends Interceptor {
       'wait ${delay.inMilliseconds} ms, '
       'error: ${err.error})',
     );
-
-    if (delay != Duration.zero) await Future<void>.delayed(delay);
+    return super.onError(err, handler);
+    /*if (delay != Duration.zero) await Future<void>.delayed(delay);
 
     var header = Map<String, dynamic>();
     header.addAll(err.requestOptions.headers);
@@ -121,7 +121,7 @@ class RetryInterceptor extends Interceptor {
     }
     // ignore: unawaited_futures
     err.requestOptions.headers = header;
-    dio.fetch<void>(err.requestOptions).then((value) => handler.resolve(value));
+    dio.fetch<void>(err.requestOptions).then((value) => handler.resolve(value));*/
   }
 
   Duration _getDelay(int attempt) {
