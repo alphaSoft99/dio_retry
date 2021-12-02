@@ -131,6 +131,8 @@ class RetryInterceptor extends Interceptor {
   }
 }
 
+Future<ConnectivityResult> connect() async => await Connectivity().checkConnectivity();
+
 extension RequestOptionsX on RequestOptions {
   static const _kAttemptKey = 'ro_attempt';
   static const _kDisableRetryKey = 'ro_disable_retry';
