@@ -132,6 +132,9 @@ class RetryInterceptor extends Interceptor {
 }
 
 Future<ConnectivityResult> connect() async => await Connectivity().checkConnectivity();
+ConnectivityResult get connectNone => ConnectivityResult.none;
+ConnectivityResult get connectMobile => ConnectivityResult.mobile;
+ConnectivityResult get connectWifi => ConnectivityResult.wifi;
 
 extension RequestOptionsX on RequestOptions {
   static const _kAttemptKey = 'ro_attempt';
