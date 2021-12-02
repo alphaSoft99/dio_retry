@@ -95,7 +95,7 @@ const retryableStatuses = <int>{
   status401Unauthorized,
   // status429TooManyRequests,
   // status500InternalServerError,
-  status502BadGateway,
+  // status502BadGateway,
   // status503ServiceUnavailable,
   // status504GatewayTimeout,
   // status440LoginTimeout,
