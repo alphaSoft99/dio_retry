@@ -1,6 +1,7 @@
 name: dio_retry
 description: A new Flutter project.
 version: 0.0.1
+publish_to: none
 homepage:
 
 environment:
