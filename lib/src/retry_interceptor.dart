@@ -82,8 +82,7 @@ class RetryInterceptor extends Interceptor {
     }
     if (error.type == DioErrorType.other) {
       var connectivityResult = await Connectivity().checkConnectivity();
-      if (connectivityResult == ConnectivityResult.none &&
-          !_isNavigatingNoInternet) {
+      if (connectivityResult == ConnectivityResult.none && !_isNavigatingNoInternet) {
         _isNavigatingNoInternet = true;
         await toNoInternetPageNavigator();
         _isNavigatingNoInternet = false;
@@ -97,8 +96,7 @@ class RetryInterceptor extends Interceptor {
   Future onError(DioError err, ErrorInterceptorHandler handler) async {
     if (err.requestOptions.disableRetry) return super.onError(err, handler);
     var attempt = err.requestOptions._attempt + 1;
-    final shouldRetry =
-        attempt <= retries && await defaultRetryEvaluator(err, attempt);
+    final shouldRetry = attempt <= retries && await defaultRetryEvaluator(err, attempt);
 
     if (!shouldRetry) return super.onError(err, handler);
 
@@ -120,20 +118,30 @@ class RetryInterceptor extends Interceptor {
     }
     // ignore: unawaited_futures
     err.requestOptions.headers = header;
-    dio.fetch<void>(err.requestOptions).then((value) => handler.resolve(value));
+    try {
+      dio.fetch<void>(err.requestOptions).then((value) {
+        handler.resolve(value);
+      });
+    } catch (e) {
+      handler.resolve(Response(
+        requestOptions: RequestOptions(path: ''),
+        data: {},
+      ));
+    }
   }
 
   Duration _getDelay(int attempt) {
     if (retryDelays.isEmpty) return Duration.zero;
-    return attempt - 1 < retryDelays.length
-        ? retryDelays[attempt - 1]
-        : retryDelays.last;
+    return attempt - 1 < retryDelays.length ? retryDelays[attempt - 1] : retryDelays.last;
   }
 }
 
 Future<ConnectivityResult> connect() async => await Connectivity().checkConnectivity();
+
 ConnectivityResult get connectNone => ConnectivityResult.none;
+
 ConnectivityResult get connectMobile => ConnectivityResult.mobile;
+
 ConnectivityResult get connectWifi => ConnectivityResult.wifi;
 
 extension RequestOptionsX on RequestOptions {
