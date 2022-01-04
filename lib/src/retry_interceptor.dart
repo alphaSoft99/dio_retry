@@ -121,7 +121,14 @@ class RetryInterceptor extends Interceptor {
     try {
       dio.fetch<void>(err.requestOptions).then((value) {
         handler.resolve(value);
-      });
+      }).catchError(
+        () => handler.resolve(
+          Response(
+            requestOptions: RequestOptions(path: ''),
+            data: {},
+          ),
+        ),
+      );
     } catch (e) {
       handler.resolve(Response(
         requestOptions: RequestOptions(path: ''),
